@@ -4,10 +4,15 @@ use std::io::{self, BufReader};
 use std::io::prelude::*;
 use std::fs::File;
 use std::path::PathBuf;
+use std::iter::Iterator;
 use structopt::StructOpt;
 
 #[derive(StructOpt, Debug)]
 struct Opt {
+    /// Print with number no blank
+    #[structopt(short = "b", long)]
+    number_nonblank: bool,
+
     /// Files to process
     #[structopt(name = "FILE", parse(from_os_str))]
     files: Vec<PathBuf>,
@@ -15,12 +20,30 @@ struct Opt {
 
 fn main() -> io::Result<()>{
     let opt = Opt::from_args();
-    for path in &opt.files {
+
+    let mut lines = vec![];
+    for path in opt.files {
         let f = File::open(path)?;
         let f = BufReader::new(f);
         for line in f.lines() {
-            println!("{}", line.unwrap());
+            lines.push(line.unwrap());
         }
     }
+
+    let mut i = 1;
+    for line in lines {
+        if opt.number_nonblank {
+            if line.trim().is_empty() {
+                println!("{}", "");
+                continue;
+            }
+            let output = format!("{0: >6} {1}", i, line);
+            println!("{}", output);
+            i += 1;
+        } else {
+            println!("{}", line);
+        }
+    }
+
     Ok(())
 }
