@@ -1,8 +1,10 @@
 /// Cat clone made by Rust
 
+use std::io::{self, BufReader};
+use std::io::prelude::*;
+use std::fs::File;
 use std::path::PathBuf;
 use structopt::StructOpt;
-use anyhow::{Context, Result};
 
 #[derive(StructOpt, Debug)]
 struct Opt {
@@ -11,13 +13,14 @@ struct Opt {
     files: Vec<PathBuf>,
 }
 
-fn main() -> Result<()>{
+fn main() -> io::Result<()>{
     let opt = Opt::from_args();
-    // println!("{:#?}", opt);
     for path in &opt.files {
-        let content = std::fs::read_to_string(path)
-            .with_context(|| format!("could not read file `{}`", path.display()))?;
-        println!("{}", content);
+        let f = File::open(path)?;
+        let f = BufReader::new(f);
+        for line in f.lines() {
+            println!("{}", line.unwrap());
+        }
     }
     Ok(())
 }
