@@ -31,19 +31,21 @@ fn main() -> io::Result<()>{
     }
 
     let mut i = 1;
+    let mut output = vec![];
     for line in lines {
         if opt.number_nonblank {
             if line.trim().is_empty() {
-                println!("{}", "");
+                output.push(line);
                 continue;
             }
-            let output = format!("{0: >6} {1}", i, line);
-            println!("{}", output);
+            output.push(format!("{0: >6} {1}", i, line));
             i += 1;
         } else {
-            println!("{}", line);
+            // no option
+            output.push(line);
         }
     }
+    println!("{}", output.join("\n"));
 
     Ok(())
 }
