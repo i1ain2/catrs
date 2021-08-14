@@ -13,6 +13,10 @@ struct Opt {
     #[structopt(short = "b", long)]
     number_nonblank: bool,
 
+    /// suppress repeated empty output lines
+    #[structopt(short = "s", long)]
+    squeeze_blank: bool,
+
     /// Files to process
     #[structopt(name = "FILE", parse(from_os_str))]
     files: Vec<PathBuf>,
@@ -32,7 +36,23 @@ fn main() -> io::Result<()>{
 
     let mut i = 1;
     let mut output = vec![];
+    let is_no_opt = ! (opt.number_nonblank || opt.squeeze_blank);
+    let mut continuous_blank = false;
     for line in lines {
+        if is_no_opt {
+            output.push(line);
+            continue;
+        }
+        if opt.squeeze_blank {
+            if line.trim().is_empty() {
+                if continuous_blank {
+                    continue;
+                }
+                continuous_blank = true;
+            } else {
+                continuous_blank = false;
+            }
+        }
         if opt.number_nonblank {
             if line.trim().is_empty() {
                 output.push(line);
@@ -40,9 +60,6 @@ fn main() -> io::Result<()>{
             }
             output.push(format!("{0: >6} {1}", i, line));
             i += 1;
-        } else {
-            // no option
-            output.push(line);
         }
     }
     println!("{}", output.join("\n"));
