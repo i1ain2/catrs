@@ -9,7 +9,7 @@ use structopt::StructOpt;
 
 #[derive(StructOpt, Debug)]
 struct Opt {
-    /// Print with number no blank
+    /// number nonempty output lines
     #[structopt(short = "b", long)]
     number_nonblank: bool,
 
